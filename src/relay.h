@@ -2,11 +2,9 @@
 #define _RELAY_H 1
 
 #include "Arduino.h"
-#include "main.h"
-#include <array>
-#include "FS.h"
-#include "time.h"
-#include "logging.h"
+
+#define OFF LOW
+#define ON HIGH
 
 class Relay {
     private:
@@ -19,43 +17,9 @@ class Relay {
     String item;
 
     private:
-    void readShutOffTime() {
-        shutOffTime = -1;
+    void readShutOffTime();
 
-        bool result = SPIFFS.begin();
-        if (result) {
-            File f = SPIFFS.open("/f" + String(pin) + ".txt", "r");
-  
-            if (f) {
-                String line = f.readStringUntil('\n');
-                f.close();   
-
-                long storedTime = atol(line.c_str());
-                logMsg("Read shutoff time for relay " + String(number) + " at pin " + String(pin) + ": " + line);
-
-                if (storedTime > localTime()) {
-                    shutOffTime = storedTime;
-                    state = ON;
-                } 
-            } 
-        }
-    }
-
-    void writeShutOffTime() {
-        bool result = SPIFFS.begin();
-        if (result) {
-            if (shutOffTime == -1 || shutOffTime < localTime()) {
-                SPIFFS.remove("/f" + String(pin) + ".txt");
-            } else {
-                File f = SPIFFS.open("/f" + String(pin) + ".txt", "w");
-
-                if (f) {
-                    f.println(String(shutOffTime));
-                    f.close();   
-                } 
-            }
-        }
-    }
+    void writeShutOffTime();
 
     public:
     Relay(int n, int p, String i) {
@@ -91,14 +55,7 @@ class Relay {
     }
 };
 
-std::vector<Relay> RELAYS = {Relay(1, D0, "IrrigationSwitchLawn"), Relay(2, D2, "IrrigationSwitchFlowers")};
-
-Relay NO_RELAY(-1, -1, "");
-
-std::vector<Relay> getRelays();
-
-Relay* getRelayWithNumber(int num);
-
-void initializePins();
+void relay_setup();
+void relay_loop();
 
 #endif

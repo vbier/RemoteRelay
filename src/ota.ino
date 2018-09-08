@@ -2,11 +2,14 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>    //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
-void ota_setup(const char* hostname, const char* password) {
+#include "main.h"
+#include "ota.h"
+
+void ota_setup() {
     // initialize OTA update
     // in case, debug output can be placed in the stubs
-    ArduinoOTA.setHostname(hostname);
-    ArduinoOTA.setPassword(password);
+    ArduinoOTA.setHostname(HOST);
+    ArduinoOTA.setPassword(OTA_PASS);
 
     ArduinoOTA.onStart([](){
       Serial.println("Start updating...");

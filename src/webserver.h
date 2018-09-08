@@ -6,14 +6,8 @@
 ESP8266WebServer server(80);
 
 void sendRedirect();
-int getRelayFromRequest();
 
-int getRelayIdxFromRequest();
-int getDurationFromRequest();
-
-void webserver_setup(ESP8266WebServer::THandlerFunction onHandler, 
-                     ESP8266WebServer::THandlerFunction offHandler, 
-                     ESP8266WebServer::THandlerFunction stateHandler);
+void webserver_setup();
 void webserver_loop();
 
 #endif

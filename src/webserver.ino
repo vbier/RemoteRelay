@@ -1,9 +1,9 @@
 #include "webserver.h"
 #include "main.h"
 #include "time.h"
+#include "config.h"
 #include "logging.h"
 #include "Arduino.h"
-#include "relay.h"
 
 static char refreshHtml[] PROGMEM =
     "<!DOCTYPE HTML>\n"
@@ -93,14 +93,16 @@ String generateXML() {
     XML += "</id>";
     XML += "<status>";
 
-    for(Relay& r : getRelays()) {
-        XML += "Status Relay " + String(r.number) + ": ";
-        if (r.getState() == ON) {
-            XML += "ON";
-        } else {
-            XML += "OFF";
+    if (config != nullptr) {
+        for(Relay& r : config->getRelays()) {
+            XML += "Status Relay " + String(r.number) + ": ";
+            if (r.getState() == ON) {
+                XML += "ON";
+            } else {
+                XML += "OFF";
+            }
+            XML += "&lt;br/&gt;";
         }
-        XML += "&lt;br/&gt;";
     }
 
     XML += "Aktualisierung am: ";
@@ -127,37 +129,11 @@ void sendRedirect() {
     server.send_P(200, "text/html", refreshHtml);
 }
 
-int getRelayFromRequest() {
-    if (server.hasArg("relay")) {
-        String relayStr = server.arg("relay");
-        return relayStr.toInt();
-    }
-
-    return -1;
-}
-
-int getDurationFromRequest() {
-    if (server.hasArg("duration")) {
-        String durationStr = server.arg("duration");
-        int duration = durationStr.toInt();
-
-        if (duration > 0) {
-            return duration;
-        }
-    }
-
-    return -1;
-}
-
-void webserver_setup(ESP8266WebServer::THandlerFunction onHandler, ESP8266WebServer::THandlerFunction offHandler,  ESP8266WebServer::THandlerFunction stateHandler) {
+void webserver_setup() {
     Serial.println("Setting up webserver...");
 
     server.on("/", handleWebsite);
     server.on("/xml", handleXML);
-
-    server.on("/on", onHandler);
-    server.on("/off", offHandler);
-    server.on("/state", stateHandler);
 
     // start the webserver
     server.begin();

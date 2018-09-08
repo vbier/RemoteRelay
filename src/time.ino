@@ -42,9 +42,13 @@ void sendNTPpacket(IPAddress &address) {
 }
 
 time_t getNtpTime() {
+  if (config == nullptr) {
+    return 0;
+  }
+
   while (Udp.parsePacket() > 0) ; // discard any previously received packets
-  Serial.println("Transmitting NTP Request...");
-  sendNTPpacket(timeServer);
+  Serial.println("Transmitting NTP Request to " + config->timeServer.toString() + "...");
+  sendNTPpacket(config->timeServer);
   uint32_t beginWait = millis();
   while (millis() - beginWait < 1500) {
     int size = Udp.parsePacket();

@@ -1,7 +1,9 @@
 #ifndef _OTA_H
 #define _OTA_H 1
 
-void ota_setup(const char* hostname, const char* password);
+const char *OTA_PASS = "RemoteRelayPwd";
+
+void ota_setup();
 void ota_loop();
 
 #endif
