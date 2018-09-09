@@ -2,6 +2,7 @@
 #include <ArduinoJson.h> //https://github.com/bblanchon/ArduinoJson
 #include "main.h"
 #include "logging.h"
+#include "time.h"
 #include "webserver.h"
 
 static char setupHtml[] PROGMEM = "<!DOCTYPE HTML>"
@@ -60,6 +61,7 @@ static char setupHtml[] PROGMEM = "<!DOCTYPE HTML>"
 "<input type='text' class='form-control' id='relayd3' name='relayd3' placeholder='Enter openHAB switch item name'>"
 "<small id='relayd3-help' class='form-text text-muted'>The item name of the openHAB switch item that shall be controlled be the relay connected to pin D3.</small>"
 "</div>"
+"<div class='form-group'>"
 "<label for='relayd4'>4: Relay Item connected to D4</label>"
 "<input type='text' class='form-control' id='relayd4' name='relayd4' placeholder='Enter openHAB switch item name'>"
 "<small id='relayd4-help' class='form-text text-muted'>The item name of the openHAB switch item that shall be controlled be the relay connected to pin D4.</small>"
@@ -207,10 +209,9 @@ void saveSetupHandler() {
     c.timeServer = toIPAddress(server.arg("ntp-server").c_str());
 
     if (saveConfig()) {
-        server.send_P(200, "text/html", "<htnl><body>Configuration has been saved. Rebooting...</body></html>");
-
-        logMsg("restarting ESP...");
-        ESP.restart();
+        time_setup();
+        relay_setup();
+        sendRedirect();
     } else {
         server.send_P(200, "text/html", "<htnl><body>Failed to save configuration.</body></html>");
     }
