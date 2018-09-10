@@ -7,7 +7,7 @@ In order for this to work, the code synchronizes the device time with an NTP ser
 
 ## Installing 
 
-Compile and upload using your favorite Arduino IDE.
+Install the HW (you will find instructions if you google for "ESP8266 relay"), compile and upload the fimware using your favorite Arduino IDE.
 
 ## Setup
 
@@ -32,6 +32,6 @@ wget http://\<device ip\>/on?relay=1&duration=20
 
 The duration parameter is optional.
 
-## Checking relay state
+## Checking device and relay state
 
-Open the device in a web browser: http://\<device ip\>
+Open the device in a web browser: http://\<device ip\>. This will show a page showing the status of time synchronization as well as the status of all connected relays.
