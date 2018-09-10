@@ -23,7 +23,7 @@ void Relay::readShutOffTime() {
             long storedTime = atol(line.c_str());
             logMsg("Read shutoff time for relay " + String(number) + " at pin " + String(pin) + ": " + line);
 
-            if (storedTime > localTime()) {
+            if (storedTime > localTime() && isTimeSynchronized()) {
                 shutOffTime = storedTime;
                 state = ON;
             } 

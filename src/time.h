@@ -6,6 +6,7 @@
 void time_setup();
 void time_loop();
 
+bool isTimeSynchronized();
 String getFormattedTime();
 time_t localTime();
 

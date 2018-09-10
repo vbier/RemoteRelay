@@ -19,6 +19,12 @@ unsigned int localPort = 8888;  // local port to listen for UDP packets
 const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
 byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
 
+bool timesynched = false;
+
+bool isTimeSynchronized() {
+  return timesynched;
+}
+
 // send an NTP request to the time server at the given address
 void sendNTPpacket(IPAddress &address) {
   // set all bytes in the buffer to 0
@@ -61,6 +67,7 @@ time_t getNtpTime() {
       secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
       secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
       secsSince1900 |= (unsigned long)packetBuffer[43];
+      timesynched = true;
       return secsSince1900 - 2208988800UL;
     }
   }
@@ -98,6 +105,8 @@ long current_timestamp() {
 }
 
 void time_setup() {
+  timesynched = false;
+
   Udp.begin(localPort);
   setSyncProvider(getNtpTime);
   setSyncInterval(86400); // sync once a day

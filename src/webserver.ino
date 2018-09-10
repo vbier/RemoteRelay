@@ -91,7 +91,9 @@ String generateXML() {
     XML += "<id>";
     XML += HOST;
     XML += "</id>";
-    XML += "<status>";
+    XML += "<status>Time synchronized: ";
+    XML += (isTimeSynchronized() ? "true" : "false");
+    XML += "&lt;br/&gt;";
 
     if (config != nullptr) {
         for(Relay& r : config->getRelays()) {
