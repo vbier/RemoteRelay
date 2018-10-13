@@ -96,7 +96,7 @@ String generateXML() {
     XML += "&lt;br/&gt;";
 
     if (config != nullptr) {
-        for(Relay& r : config->getRelays()) {
+        for(Relay& r : *(config->getRelays())) {
             XML += "Status Relay " + String(r.number) + ": ";
             if (r.getState() == ON) {
                 XML += "ON";

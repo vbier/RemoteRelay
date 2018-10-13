@@ -31,8 +31,8 @@ class Config {
         return val;
     }
 
-    std::vector<Relay> getRelays() {
-        return relays;
+    std::vector<Relay>* getRelays() {
+        return &relays;
     }
 
     void addRelay(Relay r) {

@@ -166,7 +166,7 @@ bool saveConfig() {
             root["port"] = c.openHABPort;
             root["ipaddress"] = c.timeServer.toString();
 
-            for(Relay& r : c.getRelays()) {
+            for (Relay& r : *(c.getRelays())) {
                 root["relayd" + String(r.number)] = r.item;
             }
             root.printTo(configFile);

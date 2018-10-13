@@ -1,4 +1,7 @@
 #include "FS.h"
+#include <unordered_set>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 
 #include "config.h"
 #include "main.h"
@@ -8,6 +11,7 @@
 
 long lastTime = -1;
 Relay NO_RELAY(-1, -1, "");
+std::unordered_set<int> pendingStateUpdates;
 
 void Relay::readShutOffTime() {
     shutOffTime = -1;
@@ -50,15 +54,13 @@ void Relay::writeShutOffTime() {
 
 Relay* getRelayWithNumber(int num) {
     if (config != nullptr) {
-        std::vector<Relay> relays = config->getRelays();
-        for (std::vector<Relay>::iterator it = relays.begin(); it != relays.end(); ++it) {
-            Relay & r = *it;
-
+        for (auto &r : *(config->getRelays())) {
             if (r.number == num) {
                 return &r;
             }
         }
     }
+
     return &NO_RELAY;
 }
 
@@ -116,6 +118,8 @@ void onHandler() {
         }
 
         setRelayState(&r, ON);
+        logMsg("relay state has been set, sending redirect");
+
         sendRedirect();
     }
 }
@@ -138,38 +142,50 @@ void stateHandler() {
     }
 }
 
-void updateState(Relay r) {
+bool updateState(Relay r) {
     if (r.item.length() > 0 && config != nullptr) {
-        logMsg("Sending state of relay " + String(r.number) + " at pin " + String(r.pin) + " (item " + r.item + ") to openHAB: " + String(r.getState()));
-
+        Serial.println("updateState: relay " + String(r.number) + " at pin " + String(r.pin) + ", item=" + r.item);
+       
         String value = "";
-        String vlength = "";
 
         switch (r.getState()) {
             case ON:
                 value = "ON";
-                vlength = "2";
                 break;
             case OFF:
                 value = "OFF";
-                vlength = "3";
                 break;
         }
 
-        WiFiClient client; // Webclient initialisieren
-        if (!client.connect(config->openHABServer, config->openHABPort)) { // connect with openhab 8080
-            logMsg("Fehler: Verbindung zur OH konnte nicht aufgebaut werden");
-            delay(100);
-            return;
-        }
+        HTTPClient http;
+        http.begin("http://" + config->openHABServer  + ":" + String(config->openHABPort) + "/rest/items/" + r.item + "/state");
+        http.addHeader("Content-Type", "text/plain");
+ 
+        int httpCode = http.PUT(value);
+        Serial.println("Relay " + String(r.number) + " at pin " + String(r.pin) + ": httpCode= " + httpCode);
 
-        client.println("PUT /rest/items/" + r.item + "/state HTTP/1.1");
-        client.print("Host: ");
-        client.println(config->openHABServer);
-        client.println("Connection: close");
-        client.println("Content-Type: text/plain");
-        client.println("Content-Length: " + vlength + "\r\n");
-        client.print(value);
+        if (httpCode < 200 || httpCode >= 300) {
+            queueUpdate(r);
+        } else {
+            if (pendingStateUpdates.find(r.number) != pendingStateUpdates.end()) {
+                pendingStateUpdates.erase(pendingStateUpdates.find(r.number));
+            }
+            logMsg("Sent state of relay " + String(r.number) + " at pin " + String(r.pin) + " (item " + r.item + ") to openHAB: " + value);
+        }
+        http.end();
+
+        return httpCode >= 200 && httpCode < 300;
+    }
+
+    return false;
+}
+
+void queueUpdate(Relay r) {
+    if(pendingStateUpdates.count(r.number) == 0) {
+        logMsg("Queuing state update of relay " + String(r.number) + " at pin " + String(r.pin));
+        pendingStateUpdates.emplace(r.number);
+    } else {
+        Serial.println("Relay " + String(r.number) + " at pin " + String(r.pin) + "already queued!");
     }
 }
 
@@ -182,6 +198,7 @@ void setRelayState(Relay *relay, int state) {
 
     if (r.getState() != state) {
         r.setState(state);
+
         updateState(r);
     }
 }
@@ -191,11 +208,8 @@ void iterateRelays(long now, boolean sendUpdates) {
         return;
     }
 
-    std::vector<Relay> relays = config->getRelays();
-    for (std::vector<Relay>::iterator it = relays.begin(); it != relays.end(); ++it) {
+    for (auto &r : *(config->getRelays())) {
         boolean updateSent = false;
-
-        Relay & r = *it;
         //logMsg("relay " + String(r.number) + " at pin " + String(r.pin) + ": state=" + String(r.getState()) + ", time=" + String(r.getShutOffTime()));
 
         if (r.getState() == ON && r.getShutOffTime() > 0 && r.getShutOffTime() < now && digitalRead(r.pin) == ON) {
@@ -214,7 +228,8 @@ void iterateRelays(long now, boolean sendUpdates) {
             digitalWrite(r.pin, ON);
         }
 
-        if (!updateSent && sendUpdates) {
+        if (!updateSent && (sendUpdates || (now % 10 == 0 && pendingStateUpdates.count(r.number)))) {
+            Serial.println("trying to send buffered update for relay " + String(r.number));
             updateState(r);
         }
     }
@@ -223,7 +238,7 @@ void iterateRelays(long now, boolean sendUpdates) {
 void relay_setup() {
     if (config != nullptr) {
         logMsg("setting pin mode...");
-        for (auto r : config->getRelays()) {
+        for (auto r : *(config->getRelays())) {
             pinMode(r.pin, OUTPUT);
         }
     }
