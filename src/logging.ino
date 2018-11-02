@@ -9,7 +9,7 @@ String getLogText() {
 }
 
 void logMsg(String msg) {
-    String text = getFormattedTime() + " " + msg;
+    String text = getFormattedDateTime() + " " + msg;
     Serial.println(text);
     
     int len = text.length();

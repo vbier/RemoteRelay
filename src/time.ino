@@ -75,7 +75,23 @@ time_t getNtpTime() {
   return 0; // return 0 if unable to get the time
 }
 
+String formatDateTime(time_t local) {
+  if (!isTimeSynchronized()) {
+    return "-";
+  }
+
+  String minutes = String(minute(local));
+  if (minutes.length() < 2) {
+    minutes = "0" + minutes;
+  }
+  return String(day(local)) + "." + String(month(local)) + ". " + String(hour(local)) + ":" + minutes;
+}
+
 String formatTime(time_t local) {
+  if (!isTimeSynchronized()) {
+    return "-";
+  }
+
   String minutes = String(minute(local));
   if (minutes.length() < 2) {
     minutes = "0" + minutes;
@@ -90,6 +106,10 @@ String formatTime(time_t local) {
 time_t localTime() {
   utc = now();
   return CE.toLocal(now(), &tcr);
+}
+
+String getFormattedDateTime() {
+  return formatDateTime(localTime());
 }
 
 String getFormattedTime() {

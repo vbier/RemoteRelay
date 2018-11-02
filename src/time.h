@@ -8,6 +8,7 @@ void time_loop();
 
 bool isTimeSynchronized();
 String getFormattedTime();
+String getFormattedDateTime();
 time_t localTime();
 
 #endif
