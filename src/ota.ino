@@ -5,11 +5,11 @@
 #include "main.h"
 #include "ota.h"
 
-void ota_setup() {
+void ota_setup(const char* hostName, const char* passwd) {
     // initialize OTA update
     // in case, debug output can be placed in the stubs
-    ArduinoOTA.setHostname(HOST);
-    ArduinoOTA.setPassword(OTA_PASS);
+    ArduinoOTA.setHostname(hostName);
+    ArduinoOTA.setPassword(passwd);
 
     ArduinoOTA.onStart([](){
       Serial.println("Start updating...");

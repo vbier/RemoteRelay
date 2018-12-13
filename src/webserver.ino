@@ -5,7 +5,7 @@
 #include "logging.h"
 #include "Arduino.h"
 
-static char refreshHtml[] PROGMEM =
+const PROGMEM static char refreshHtml[] =
     "<!DOCTYPE HTML>\n"
     "<html lang='en'>\n"
     "<head>\n"
@@ -13,7 +13,7 @@ static char refreshHtml[] PROGMEM =
     "</head>\n"
     "</html>";
 
-static char webSiteHtml[] PROGMEM =
+const PROGMEM static char webSiteHtml[] =
     "<!DOCTYPE HTML>\n"
     "<html lang='en'>\n"
     "<head>\n"

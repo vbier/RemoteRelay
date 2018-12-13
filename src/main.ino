@@ -55,7 +55,7 @@ void setup() {
     config_setup();
     relay_setup();
 
-    ota_setup();
+    ota_setup(HOST, "RemoteRelayPwd");
     time_setup();    
 
     webserver_setup();

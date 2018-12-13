@@ -5,7 +5,7 @@
 #include "time.h"
 #include "webserver.h"
 
-static char setupHtml[] PROGMEM = "<!DOCTYPE HTML>"
+const PROGMEM static char setupHtml[] = "<!DOCTYPE HTML>"
 "<html lang='en'>"
 "<head>"
 "<title>RemoteRelay</title>"
