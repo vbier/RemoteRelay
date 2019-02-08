@@ -25,13 +25,27 @@ It additionally allows to configure the connected relays. You can set an item na
 
 ## Switching relays
 
-An example call to open relay connected to pin D1 for 20 seconds from the linux command line looks like this:
+An example call to ruen on relay connected to pin D1 for 20 seconds from the linux command line looks like this:
 ```
 wget http://\<device ip\>/on?relay=1&duration=20
 ```
+The duration parameter is optional and makes sure that the relay is turned off after the specfied duration in seconds. If you do not use the duration parameter, you can issue the following command to turn off the relay: 
+```
+wget http://\<device ip\>/off
+```
 
-The duration parameter is optional.
+
+If you want to use an openHAB switch item to control the relay, you have to use the http binding and define the switch items like this:
+
+```
+Switch IrrigationSwitchLawn "Bewässerung Rasen" { http=">[ON:GET:http://192.168.178.59/on?relay=1] >[OFF:GET:http://192.168.178.59/off?relay=1]",autoupdate="false"}
+```
+
+Make sure to adapt the IP address to the address of the device and use the correct relay number in the URLs.
+
 
 ## Checking device and relay state
 
 Open the device in a web browser: http://\<device ip\>. This will show a page showing the status of time synchronization as well as the status of all connected relays.
+
+If you have defined an item in openHAB like described above, the firmware will update the switch item whenever the relay is toggled.
