@@ -5,9 +5,16 @@ Arduino code that controlls relays connected to the device. Relays can be opened
 It allows to permanently switching the relay, or using a duration. If a duration is used, the end time is written to the flash memory and survives reboots.
 In order for this to work, the code synchronizes the device time with an NTP server. It also opens a webserver that allows to view the current relay state and also see a debug log of things that have happened in the recent past.
 
-## Installing 
+## Installation
 
-Install the HW (you will find instructions if you google for "ESP8266 relay"), compile and upload the fimware using your favorite Arduino IDE.
+For installing the HW use any of the available tutorials (you will find instructions if you google for "ESP8266 relay")
+
+Then compile and upload the fimware using your favorite Arduino IDE. You will need to following libraries:
+    ArduinoJson
+    Time
+    Timezone
+    WifiManager
+    esp8266_mdns
 
 ## Setup
 
